@@ -1,5 +1,12 @@
 package com.epam.mjc;
 
+import javax.security.auth.login.Configuration;
+import java.io.IOException;
+import com.epam.mjc.MethodSignature;
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class MethodParser {
 
     /**
@@ -19,7 +26,46 @@ public class MethodParser {
      * @param signatureString source string to parse
      * @return {@link MethodSignature} object filled with parsed values from source string
      */
+
     public MethodSignature parseFunction(String signatureString) {
-        throw new UnsupportedOperationException("You should implement this method.");
+
+        String[] partsTypeAndName = signatureString.split("\\(");
+        String[] firstParts = partsTypeAndName[0].split(" ");
+
+        String accessModifier = null;
+        String returnType;
+        String methodName;
+
+        if (firstParts.length == 3) {
+            accessModifier = firstParts[0];
+            returnType = firstParts[1];
+            methodName = firstParts[2];
+        } else if (firstParts.length == 2) {
+            returnType = firstParts[0];
+            methodName = firstParts[1];
+        } else {
+            throw new IllegalArgumentException("Invalid method signature");
+        }
+
+        List<MethodSignature.Argument> argumentList = new ArrayList<>();
+
+        if (partsTypeAndName.length > 1) {
+            String argumentsString = partsTypeAndName[1].substring(0, partsTypeAndName[1].length() - 1);
+            if (!argumentsString.isEmpty()) {
+                String[] arguments = argumentsString.split(", ");
+
+                for (String argument : arguments) {
+                    String[] argumentParts = argument.split(" ");
+                    argumentList.add(new MethodSignature.Argument(argumentParts[0], argumentParts[1]));
+                }
+            }
+        }
+
+        MethodSignature methodSignature = new MethodSignature(methodName, argumentList);
+        methodSignature.setAccessModifier(accessModifier);
+        methodSignature.setReturnType(returnType);
+
+        return methodSignature;
     }
 }
+
